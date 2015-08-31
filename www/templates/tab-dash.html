@@ -1,0 +1,32 @@
+<ion-view title="Get Me A Cab (Driver)">
+    <ion-content class="padding">
+    <div ng-show="online"><h3><b>Network status:</b> up</h3></div>
+    <div ng-show="!online"><h3><b>Network status:</b> down</h3></div>
+    <div><h3><b>Driver name:</b>  {{name}}</h3></div>
+    <div><h3><b>Driver phone:</b> <a>{{phone}}</a></h3></div>
+    <!--
+    <div><h3><b>disconnect:</b>  {{disconnect}}</h3></div>
+    <div><h3><b>connect_failed:</b>  {{connect_failed}}</h3></div>
+    <div><h3><b>update_geopos:</b>  {{update_geopos}}</h3></div>
+    -->
+    <!--
+    <div><h3><b>Current lat/lng:</b> {{lat}},{{lng}}</h3></div>
+    -->
+    <div ng-show="address!=undefined"><h3><b>Current location:</b> {{address}} ({{update_geopos_ack_ts}}) <button ng-click="update_currentpos()">update</button></h3></div>
+    <div ng-show="address==undefined"><h3><b>Current location:</b> Updating. Please wait ...</h3></div>
+    <div ng-show="waitforaccept"><h3><b>New message:</b>
+                    {{newrequest.date}}:</br>{{newrequest.user.name}} (<a ng-href="tel:{{newrequest.user.phone}}">{{newrequest.user.phone}}</a>) has requested a cab at {{newrequest.user.address}}. Estimated distance: {{newrequest.distance.text}}. Estimated duration: {{newrequest.duration.text}}.
+            </h3>
+        </div>
+    <div ng-show="waitforaccept"><h3><b>Seconds remaining:</b> {{secondsremaining}}</h3></div>
+    <div ng-show="waitforaccept"><button class="button button-positive button-block" ng-click="accept()"><h3>ACCEPT REQUEST</h3></button></div>
+    <div><h3><b>Total messages:</b> {{messages.length}}</h3></div>
+    <div class="list">
+        <div class="item item-text-wrap" ng-repeat="message in messages track by $index">
+            <div>
+                {{message.date}}:</br>{{message.user.name}} (<a ng-href="tel:{{message.user.phone}}">{{message.user.phone}}</a>) has requested a cab at {{message.user.address}}. Estimated distance: {{message.distance.text}}. Estimated duration: {{message.duration.text}}. <b>{{message.accepted ? 'Accepted.':''}}</b>
+            </div>
+        </div>
+    </div>
+    </ion-content>
+</ion-view>

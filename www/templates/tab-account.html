@@ -1,0 +1,52 @@
+<ion-view title="Get Me A Cab (Driver)">
+<ion-content class="padding">
+
+<div><h3><b>Device id:</b>  {{device.uuid}}</h3></div>
+<div><h3><b>Platform:</b>  {{device.platform}}</h3></div>
+<div><h3><b>Model:</b>  {{device.model}}</h3></div>
+<div><h3><b>Version:</b>  {{device.version}}</h3></div>
+<!--
+<div><h3><b>disconnect:</b>  {{disconnect}}</h3></div>
+<div><h3><b>connect_failed:</b>  {{connect_failed}}</h3></div>
+<div><h3><b>update_geopos:</b>  {{update_geopos}}</h3></div>
+-->
+<div ng-hide="isSignIn()">
+    <div class="card">
+        <div class="item item-divider">
+            <h3>Driver name</h3>
+        </div>
+        <div class="item item-text-wrap">
+            <input type="text" placeholder="Enter your name" ng-model="user.name"/>
+        </div>
+    </div>
+    <div class="card">
+        <div class="item item-divider">
+            <h3>Driver phone number</h3>
+        </div>
+        <div class="item item-text-wrap">
+            <input type="tel" placeholder="Enter your phone number" ng-model="user.phone"/>
+        </div>
+    </div>
+    <div class="content padding">
+        <button class="button button-positive button-block" ng-click="signin()">
+            <h3>Signin</h3>
+        </button>
+    </div>
+</div>
+
+<div ng-show="isSignIn()">
+    <div>
+        <h3><b>Driver name: </b>{{user.name}}</h3>
+    </div>
+    <div>
+        <h3><b>Driver phone: </b>{{user.phone}}</h3>
+    </div>
+    <div class="content padding">
+        <button class="button button-positive button-block" ng-click="signout()">
+            <h3>Signout</h3>
+        </button>
+    </div>
+</div>
+
+</ion-content>
+</ion-view>

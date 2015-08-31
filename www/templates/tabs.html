@@ -1,0 +1,11 @@
+<ion-tabs class="tabs-icon-top">
+
+  <ion-tab title="Dashboard" icon="icon ion-home" href="#/tab/dash" ng-if="isSignIn()">
+    <ion-nav-view name="tab-dash"></ion-nav-view>
+  </ion-tab>
+
+  <ion-tab title="Account" icon="icon ion-gear-b" href="#/tab/account">
+    <ion-nav-view name="tab-account"></ion-nav-view>
+  </ion-tab>
+
+</ion-tabs>
