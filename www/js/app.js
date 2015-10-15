@@ -161,7 +161,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.connect_failed = 0;
     $rootScope.update_geopos = 0;
     $rootScope.address = undefined;
-    var URL = '52.76.9.51:8000';
+    var URL = 'uber.ratecoworkers.com:8000';
     var device;
     var socket;
     var user = {
