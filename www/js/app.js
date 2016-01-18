@@ -130,7 +130,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 .factory('geo', function($http, $cordovaGeolocation) {
     return {
         getAddressFromGeoLocation: function(lat, lng, callback) {
-            apiKey = 'AIzaSyAEKs4ZY-sOsDnaq-M27MiOfhWK4dJfDSg';
+            apiKey = 'AIzaSyDEyaX4_QjqQ2_D6AhTUfvgJhmtuiG42TI';
             url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&location_type=ROOFTOP&result_type=street_address&key='+apiKey;
             $http.get(url).
                 success(function(data, status, headers, config) {
