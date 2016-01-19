@@ -26,7 +26,7 @@ function checkConnection() {
     };
 };
 
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'ngCordova'])
+angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'starter.services', 'ngCordova'])
 
 .run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio) {
   $ionicPlatform.ready(function() {
@@ -127,10 +127,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 }])
 
-.factory('geo', function($http, $cordovaGeolocation) {
+.factory('geo', function($http, $cordovaGeolocation, GOOGLEMAP_API_KEY) {
     return {
         getAddressFromGeoLocation: function(lat, lng, callback) {
-            apiKey = 'AIzaSyDEyaX4_QjqQ2_D6AhTUfvgJhmtuiG42TI';
+            apiKey = GOOGLEMAP_API_KEY;
             url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&location_type=ROOFTOP&result_type=street_address&key='+apiKey;
             $http.get(url).
                 success(function(data, status, headers, config) {
