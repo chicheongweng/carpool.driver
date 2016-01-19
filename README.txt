@@ -1,3 +1,12 @@
+versions:
+
+ionic 1.7.12
+bower 1.7.2
+npm 2.14.7
+node v4.2.3
+sass Sass 3.4.19 (Selective Steve)
+gulp CLI version 3.9.0
+
 steps to install:
 1. ionic state reset
 2. ionic build ios
