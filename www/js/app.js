@@ -39,12 +39,20 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
-    $cordovaNativeAudio.preloadSimple('bell', 'audio/driver.mp3')
-    .then(function (msg) {
-    console.log(msg);
-    }, function (error) {
-    alert(error);
-    });
+
+    var device = $cordovaDevice.getDevice();
+    var src = MEDIA_FILE;
+
+    if (typeof device != "undefined") {
+        if (device.platform.toLowerCase() === "android") {
+            src = '/android_asset/www/' + src;
+        }
+        console.log("media src = " + src);
+        $rootScope.mediaSrc = new Media(src, null, function onError(e) { console.log("error playing sound: " + JSON.stringify(e)); });
+        $rootScope.mediaSrc.play();
+    } else {
+        console.log("no sound API to play: " + src);
+    }
 
     $rootScope.online = checkConnection();
     $window.addEventListener("offline", function () {
@@ -64,13 +72,13 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
     if (typeof device != "undefined") {
         if (device.platform.toLowerCase() === "android") {
             src = '/android_asset/www/' + src;
-        }
-        console.log("media src = "+src);
-        $rootScope.mediaSrc = new Media(src, null, function onError(e) { console.log("error playing sound: " + JSON.stringify(e)); }); 
+        }   
+        console.log("media src = " + src);
+        $rootScope.mediaSrc = new Media(src, null, function onError(e) { console.log("error playing sound: " + JSON.stringify(e)); });
         $rootScope.mediaSrc.play();
     } else {
         console.log("no sound API to play: " + src);
-    } 
+    }  
 
     $rootScope.messages = [];
     $rootScope.socket = null;

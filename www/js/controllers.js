@@ -97,7 +97,7 @@ angular.module('starter.controllers',[])
                 $rootScope.messages.unshift(data);
             }); 
             */ 
-            $rootScope.mediaSrc.play(MEDIA_FILE);
+            $rootScope.mediaSrc.play();
         });     
         data.requestlistenerAdded = true;
     }
