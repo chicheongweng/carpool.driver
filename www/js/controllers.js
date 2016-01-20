@@ -44,7 +44,7 @@ angular.module('starter.controllers',[])
         return data.connstate.state == 'signin';
     }
 })
-.controller('DashCtrl',function($scope,$rootScope,$state,data,localstorage,geo,$cordovaNativeAudio,$timeout){
+.controller('DashCtrl',function($scope,$rootScope,$state,data,localstorage,geo,$timeout){
     localstorage.set('state','tab.dash');
     $scope.state = $state;
     $scope.device = data.device;
@@ -97,7 +97,7 @@ angular.module('starter.controllers',[])
                 $rootScope.messages.unshift(data);
             }); 
             */ 
-            $cordovaNativeAudio.play('bell');
+            $rootScope.mediaSrc.play(MEDIA_FILE);
         });     
         data.requestlistenerAdded = true;
     }

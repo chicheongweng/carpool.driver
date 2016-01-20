@@ -23,7 +23,8 @@
     "org.apache.cordova.geolocation",
     "org.apache.cordova.network-information",
     "com.shazron.cordova.plugin.keychainutil",
-    "cordova-plugin-nativeaudio"
+    "cordova-plugin-nativeaudio",
+    "cordova-plugin-media"
   ],
   "cordovaPlatforms": [
     "ios",

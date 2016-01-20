@@ -28,7 +28,7 @@ function checkConnection() {
 
 angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'starter.services', 'ngCordova'])
 
-.run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio) {
+.run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio,$cordovaDevice,MEDIA_FILE) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -57,6 +57,20 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
             $rootScope.online = true;
         });
     }, false);
+
+    var device = $cordovaDevice.getDevice();
+    var src = MEDIA_FILE;
+
+    if (typeof device != "undefined") {
+        if (device.platform.toLowerCase() === "android") {
+            src = '/android_asset/www/' + src;
+        }
+        console.log("media src = "+src);
+        $rootScope.mediaSrc = new Media(src, null, function onError(e) { console.log("error playing sound: " + JSON.stringify(e)); }); 
+        $rootScope.mediaSrc.play();
+    } else {
+        console.log("no sound API to play: " + src);
+    } 
 
     $rootScope.messages = [];
     $rootScope.socket = null;
