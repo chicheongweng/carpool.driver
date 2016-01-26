@@ -28,7 +28,7 @@ function checkConnection() {
 
 angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'starter.services', 'ngCordova'])
 
-.run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio,$cordovaDevice,MEDIA_FILE) {
+.run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio,$cordovaDevice,MEDIA_FILE,$cordovaNativeAudio) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -39,7 +39,7 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
-
+    /*
     var device = $cordovaDevice.getDevice();
     var src = MEDIA_FILE;
 
@@ -53,7 +53,7 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
     } else {
         console.log("no sound API to play: " + src);
     }
-
+    */
     $rootScope.online = checkConnection();
     $window.addEventListener("offline", function () {
         $rootScope.$apply(function() {
@@ -66,6 +66,7 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
         });
     }, false);
 
+    /*
     var device = $cordovaDevice.getDevice();
     var src = MEDIA_FILE;
 
@@ -79,6 +80,15 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
     } else {
         console.log("no sound API to play: " + src);
     }  
+    */
+
+    $cordovaNativeAudio.preloadSimple('driver','audio/driver.mp3').then(
+    function() {
+        console.log("audio loaded successfully");
+    },
+    function() {
+        console.log("audio loaded failed");
+    });
 
     $rootScope.messages = [];
     $rootScope.socket = null;

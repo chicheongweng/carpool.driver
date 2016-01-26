@@ -44,7 +44,7 @@ angular.module('starter.controllers',[])
         return data.connstate.state == 'signin';
     }
 })
-.controller('DashCtrl',function($scope,$rootScope,$state,data,localstorage,geo,$timeout){
+.controller('DashCtrl',function($scope,$rootScope,$state,data,localstorage,geo,$timeout,$cordovaNativeAudio){
     localstorage.set('state','tab.dash');
     $scope.state = $state;
     $scope.device = data.device;
@@ -97,7 +97,7 @@ angular.module('starter.controllers',[])
                 $rootScope.messages.unshift(data);
             }); 
             */ 
-            $rootScope.mediaSrc.play();
+            $cordovaNativeAudio.play('driver');
         });     
         data.requestlistenerAdded = true;
     }
