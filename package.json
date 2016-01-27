@@ -21,7 +21,6 @@
     "cordova-plugin-splashscreen",
     "com.ionic.keyboard",
     "org.apache.cordova.geolocation",
-    "org.apache.cordova.network-information",
     "com.shazron.cordova.plugin.keychainutil",
     "cordova-plugin-nativeaudio",
     "cordova-plugin-media"

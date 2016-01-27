@@ -8,24 +8,6 @@ function getUUID() {
     return u;
 };
 
-function checkConnection() {
-    if (window.cordova) {
-        var networkState = navigator.connection.type;
-        var states = {};
-        states[Connection.UNKNOWN]  = false;
-        states[Connection.ETHERNET] = true;
-        states[Connection.WIFI]     = true;
-        states[Connection.CELL_2G]  = true;
-        states[Connection.CELL_3G]  = true;
-        states[Connection.CELL_4G]  = true;
-        states[Connection.CELL]     = true;
-        states[Connection.NONE]     = false;
-        return states[networkState];
-    } else {
-        return navigator.onLine;
-    };
-};
-
 angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'starter.services', 'ngCordova'])
 
 .run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio,$cordovaDevice,MEDIA_FILE,$cordovaNativeAudio) {
@@ -54,18 +36,6 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
         console.log("no sound API to play: " + src);
     }
     */
-    $rootScope.online = checkConnection();
-    $window.addEventListener("offline", function () {
-        $rootScope.$apply(function() {
-            $rootScope.online = false;
-        });
-    }, false);
-    $window.addEventListener("online", function () {
-        $rootScope.$apply(function() {
-            $rootScope.online = true;
-        });
-    }, false);
-
     /*
     var device = $cordovaDevice.getDevice();
     var src = MEDIA_FILE;
