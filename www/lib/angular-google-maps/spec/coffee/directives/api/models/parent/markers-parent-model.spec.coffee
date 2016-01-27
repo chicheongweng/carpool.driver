@@ -6,8 +6,8 @@ describe "MarkersParentModel - Clusterer Event Extensions", ->
   beforeEach ->
     @clusterTest =
       getMarkers: ->
-        values: () -> [
-          {key: 1}
+        [
+          {key: 1},
           {key: 2}
         ]
     @index = 0
@@ -36,7 +36,7 @@ describe "MarkersParentModel - Clusterer Event Extensions", ->
       models: []
 
     #define / inject values into the item we are testing... not a controller but it allows us to inject
-    angular.module('mockModule', ["google-maps".ns(),"google-maps.mocks"])
+    angular.module('mockModule', ["google-maps","google-maps.mocks"])
     .value('map', document.gMap)
     .value('element', {})
     .value('attrs', click: true)
@@ -44,23 +44,21 @@ describe "MarkersParentModel - Clusterer Event Extensions", ->
     .value('scope', @scope)
 
     module "mockModule"
-    window["Initiator".ns()].initMock()
+    inject (GoogleApiMock) =>
+      @gmap = new GoogleApiMock(false)
+      @gmap.mockEvent()
 
-    inject ['$rootScope', 'element', 'attrs', 'map',
-      'MarkersParentModel'.ns(), 'GoogleMapsUtilV3'.ns(),'ExtendMarkerClusterer'.ns(),
-      ($rootScope, element, attrs, map, MarkersParentModel, GoogleMapsUtilV3,ExtendMarkerClusterer) =>
-        GoogleMapsUtilV3.init()
-        ExtendMarkerClusterer.init()
-        scope = $rootScope.$new()
-
-        @scope = _.extend @scope, scope
-        @scope.options =
-          animation: google.maps.Animation.BOUNCE
-        @testCtor = MarkersParentModel
-
-        @subject = new @testCtor(@scope, element, attrs, map)
-        @subject
-    ]
+    inject ($rootScope, element, attrs, map, MarkersParentModel) =>
+      scope = $rootScope.$new()
+      $timeout = ((fn)->
+        fn())
+      @scope = _.extend @scope, scope
+      @scope.options =
+        animation: google.maps.Animation.BOUNCE
+      @testCtor = MarkersParentModel
+      @fireListener = window.google.maps.event.fireListener
+      @subject = new @testCtor(@scope, element, attrs, map, $timeout)
+      @subject
 
   it 'constructor exist', ->
     expect(@testCtor).toBeDefined()
@@ -99,3 +97,4 @@ describe "MarkersParentModel - Clusterer Event Extensions", ->
             expect(@markerModelsCluster).toBe("crap")
       describe "not fired", ->
         it 'click - ', ->
+

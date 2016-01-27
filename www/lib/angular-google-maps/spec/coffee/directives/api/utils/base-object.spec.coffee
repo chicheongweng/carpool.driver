@@ -1,7 +1,7 @@
 describe "oo.BaseObject", ->
     beforeEach ->
-        module "google-maps.directives.api.utils".ns()
-        inject ['BaseObject'.ns(), (BaseObject) =>
+        module "google-maps.directives.api.utils"
+        inject (BaseObject) =>
             @subject = BaseObject
             PersonModule =
                 changePersonName: (person, name)->
@@ -24,7 +24,6 @@ describe "oo.BaseObject", ->
             @state = "fl"
             @defaultUsage = new Person()
             @usage = new Person(@name, @state)
-        ]
 
     it "exists ~ you loaded the script!", ->
         expect(@subject?).toEqual(true)

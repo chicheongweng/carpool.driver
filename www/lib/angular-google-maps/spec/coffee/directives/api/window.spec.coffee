@@ -1,6 +1,24 @@
 describe "directives.api.Window", ->
     beforeEach ->
-        window["Initiator".ns()].initMock()
+        window.google
+        module "google-maps"
+        module "google-maps.mocks"
+        inject (GoogleApiMock) =>
+          @gmap = new GoogleApiMock()
+          @gmap.mockAPI()
+          @gmap.mockLatLng()
+          @gmap.mockMarker()
+          @gmap.mockInfoWindow()
+          @gmap.mockEvent()
+        ### Possible Attributes
+                coords: '=coords',
+				show: '=show',
+				templateUrl: '=templateurl',
+				templateParameter: '=templateparameter',
+				isIconVisibleOnClick: '=isiconvisibleonclick',
+				closeClick: '&closeclick',           #scope glue to gmap InfoWindow closeclick
+				options: '=options'
+        ###
         @mocks =
             scope:
                 coords:
@@ -9,19 +27,23 @@ describe "directives.api.Window", ->
                 show: true
                 $watch:()->
                 $on:()->
-                control: {}
             element:
                 html: ->
                     "<p>test html</p>"
             attrs: {
                 isiconvisibleonclick:true
             }
-            ctrls: [{getMap:()->{}}]
-        @gmap = {}
-        inject ['$rootScope','$q', '$compile', '$http',
-          '$templateCache', 'ExtendGWin'.ns(), 'Window'.ns(),
-          (_$rootScope_,$q, $compile, $http, $templateCache, ExtendGWin, Window) =>
-            ExtendGWin.init()
+            ctrls: [
+                {
+                  getMap:()->
+                    {}
+                }
+            ]
+
+        @timeOutNoW = (fnc,time) =>
+            fnc()
+        @gMarker = new google.maps.Marker(@commonOpts)
+        inject (_$rootScope_,$q, $compile, $http, $templateCache, $injector, Window) =>
             @$rootScope =  _$rootScope_
             d = $q.defer()
             d.resolve @gmap
@@ -31,12 +53,13 @@ describe "directives.api.Window", ->
                 @$rootScope
             @windowScope = _.extend @$rootScope.$new(), @mocks.scope
 
-            @subject = new Window()
+
+            @subject = new Window(@timeOutNoW,$compile, $http, $templateCache)
             @subject.onChildCreation = (child) =>
                 @childWindow = child
 
             @prom = d.promise
-        ]
+            return
 
     it "should test receive the fulfilled promise!!", ->
         result = undefined
@@ -47,7 +70,7 @@ describe "directives.api.Window", ->
 
     it 'can be created', ->
         expect(@subject).toBeDefined()
-#        expect(@subject.index).toEqual(@index)
+        expect(@subject.index).toEqual(@index)
 
     it 'link creates window options and a childWindow', ->
 
@@ -55,20 +78,8 @@ describe "directives.api.Window", ->
         crap = null
         @prom.then ->
             crap = "set"
+        #holy crap $rootScope.$apply() must come after all promises!!!!!
         @$rootScope.$apply() #force $q to resolve
         expect(crap).toBe 'set'
         expect(@childWindow).toBeDefined()
         expect(@childWindow.opts).toBeDefined()
-
-    it 'slaps control functions when a control is available', ->
-      @subject.link(@mocks.scope, @mocks.element, @mocks.attrs, @mocks.ctrls)
-      @$rootScope.$apply() #force $q to resolve
-      expect(@mocks.scope.control.getChildWindows).toBeDefined()
-      expect(@mocks.scope.control.getGWindows).toBeDefined()
-
-    it 'control functions work', ->
-      @subject.link(@mocks.scope, @mocks.element, @mocks.attrs, @mocks.ctrls)
-      @$rootScope.$apply() #force $q to resolve
-      expect(@mocks.scope.control.getChildWindows().length).toBe(1)
-      expect(@mocks.scope.control.getChildWindows()[0]).toEqual(@childWindow)
-      expect(@mocks.scope.control.getGWindows()[0]).toEqual(@childWindow.gWin)

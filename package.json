@@ -22,8 +22,9 @@
     "com.ionic.keyboard",
     "org.apache.cordova.geolocation",
     "com.shazron.cordova.plugin.keychainutil",
-    "cordova-plugin-nativeaudio",
-    "cordova-plugin-media"
+    "git://github.com/apache/cordova-plugin-inappbrowser#1.0.0",
+    "cordova-plugin-media",
+    "cordova-plugin-nativeaudio"
   ],
   "cordovaPlatforms": [
     "ios",

@@ -25,19 +25,19 @@
         <button class="col-md-2 btn btn-success" ng-click="map.refresh()">Refresh Map</button>
     </div>
     <div class="row">
-        <ui-gmap-google-map class="col-md-12"
+        <google-map class="col-md-12"
                     center="map.center"
                     zoom="map.zoom"
                     dragging="map.dragging"
                     draggable="true"
                     control="map.control">
 
-            <ui-gmap-markers models="map.dynamicMarkers" coords="'self'" icon="'icon'" click="'onClicked'" fit='true' options="'options'">
-                <ui-gmap-windows show="'showWindow'" closeClick="'closeClick'" ng-cloak>
+            <markers models="map.dynamicMarkers" coords="'self'" icon="'icon'" click="'onClicked'" fit='true' options="'options'">
+                <windows show="'showWindow'" closeClick="'closeClick'" ng-cloak>
                     <p ng-non-bindable>This is an info window at {{ latitude | number:4 }}, {{ longitude | number:4 }}!</p>
-                </ui-gmap-windows>
-            </ui-gmap-markers>
-        </ui-gmap-google-map>
+                </windows>
+            </markers>
+        </google-map>
     </div>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>

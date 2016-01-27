@@ -1,7 +1,7 @@
 describe "LayerParentModelSpec", ->
     beforeEach ->
         module("google-maps.mocks")
-        angular.module('mockModule', ["google-maps".ns()])
+        angular.module('mockModule', ["google-maps"])
         .value('mapCtrl', {})
         .value('element', {})
         .value('attrs', {})
@@ -33,12 +33,11 @@ describe "LayerParentModelSpec", ->
         @timeout = (fnc,time) =>
             fnc()
 
-        inject ['$rootScope', 'LayerParentModel'.ns(), ($rootScope, LayerParentModel) =>
+        inject ($rootScope, LayerParentModel) =>
             scope = $rootScope.$new()
             @constructor = LayerParentModel
             @scope = _.extend @scope, scope
             @subject = new @constructor(@scope,{},@attrs,@mapCtrl)
-        ]
 
     afterEach ->
         google.map = @tempMaps

@@ -1,4 +1,4 @@
-describe "WindowChildModel".ns(), ->
+describe "WindowChildModel", ->
     beforeEach ->
         if window.InfoBox
             @infoBoxRealTemp = window.InfoBox
@@ -9,7 +9,7 @@ describe "WindowChildModel".ns(), ->
                 @content_ = opt_opts.content || "";
                 @div_ = document.createElement("div")
                 @div_.className = @boxClass_
-
+                
         @scope =
             coords:
                 latitude: 90.0
@@ -20,21 +20,19 @@ describe "WindowChildModel".ns(), ->
         @windowOpts = _.extend(@commonOpts, content: 'content')
         @gMarker = new google.maps.Marker(@commonOpts)
         #define / inject values into the item we are testing... not a controller but it allows us to inject
-        angular.module('mockModule', ["google-maps".ns()])
+        angular.module('mockModule', ["google-maps"])
         .value('isIconVisibleOnClick', true)
         .value('model', @scope)
         .value('mapCtrl', document.gMap)
-        .value('gMarker', @gMarker)
+        .value('markerCtrl', @gMarker)
         .value('opts', @windowOpts)
         .value('element', '<span>hi</span>')
         .value('needToManualDestroy', false)
         .value('markerIsVisibleAfterWindowClose', true)
-        .controller 'childModel', ['WindowChildModel'.ns(),(WindowChildModel) ->
-          WindowChildModel
-        ]
+        .controller 'childModel', (WindowChildModel) ->
+                WindowChildModel
 
         angular.mock.module('mockModule')
-        window["Initiator".ns()].initMock()
 
     it 'can be created', ->
         inject(($http, $rootScope, $templateCache, $compile, $controller) =>

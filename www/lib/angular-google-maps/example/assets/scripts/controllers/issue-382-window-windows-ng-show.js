@@ -1,4 +1,4 @@
-angular.module("angular-google-maps-example", ["google-maps".ns()]).value("rndAddToLatLon",function () {
+angular.module("angular-google-maps-example", ["google-maps"]).value("rndAddToLatLon",function () {
   return Math.floor(((Math.random() < 0.5 ? -1 : 1) * 2) + 1)
 }).controller("controller", function ($scope, $timeout, $log, $http, rndAddToLatLon) {
   // Enable the new Google Maps visuals until it gets enabled by default.
@@ -26,7 +26,6 @@ angular.module("angular-google-maps-example", ["google-maps".ns()]).value("rndAd
   };
   $scope.map.markers = [
     {
-      wonkyId:0,
       longitude: 4.404418,
       latitude: 51.219053
     }

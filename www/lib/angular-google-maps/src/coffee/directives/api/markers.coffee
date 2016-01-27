@@ -1,5 +1,5 @@
-angular.module("google-maps.directives.api".ns())
-.factory "Markers".ns(), ["IMarker".ns(), "MarkersParentModel".ns(),"_sync".ns(), (IMarker, MarkersParentModel,_sync) ->
+angular.module("google-maps.directives.api")
+.factory "Markers", ["IMarker", "MarkersParentModel", "CtrlHandle", (IMarker, MarkersParentModel, CtrlHandle) ->
   class Markers extends IMarker
     constructor: ($timeout) ->
       super($timeout)
@@ -11,27 +11,21 @@ angular.module("google-maps.directives.api".ns())
         doCluster: '=docluster'
         clusterOptions: '=clusteroptions'
         clusterEvents: '=clusterevents'
+        labelContent: '=labelcontent'
+        labelAnchor: '@labelanchor'
+        labelClass: '@labelclass'
 
+      @$timeout = $timeout
+      self = @
       @$log.info @
 
     controller: ['$scope', '$element', ($scope, $element) ->
       $scope.ctrlType = 'Markers'
-      _.extend @, IMarker.handle($scope,$element)
+      CtrlHandle.handle $scope,$element
     ]
 
     link: (scope, element, attrs, ctrl) =>
-      parentModel = undefined
-      ready = =>
-        if scope.control?
-          scope.control.getGMarkers = =>
-            parentModel.gMarkerManager?.getGMarkers()
-          scope.control.getChildMarkers = =>
-            parentModel.markerModels
+      @mapPromise(scope, ctrl).then (map) =>
+        new MarkersParentModel(scope, element, attrs, map, @$timeout)
         scope.deferred.resolve()
-
-      IMarker.mapPromise(scope, ctrl).then (map) =>
-        parentModel = new MarkersParentModel(scope, element, attrs, map)
-        parentModel.existingPieces.then ->
-          ready()
-
 ]

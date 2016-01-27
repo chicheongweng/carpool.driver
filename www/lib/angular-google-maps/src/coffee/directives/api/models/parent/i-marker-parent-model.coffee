@@ -6,12 +6,13 @@
  			- icon
 		- implementation needed on watches
 ###
-angular.module("google-maps.directives.api.models.parent".ns())
-.factory "IMarkerParentModel".ns(), ["ModelKey".ns(),"Logger".ns(), (ModelKey, Logger) ->
+angular.module("google-maps.directives.api.models.parent")
+.factory "IMarkerParentModel", ["ModelKey","Logger", (ModelKey, Logger) ->
     class IMarkerParentModel extends ModelKey
         DEFAULTS: {}
-        constructor: (@scope, @element, @attrs, @map) ->
+        constructor: (@scope, @element, @attrs, @map, @$timeout) ->
             super(@scope)
+            self = @
             @$log = Logger
             # Validate required properties
             throw new String("Unable to construct IMarkerParentModel due to invalid scope") unless @validateScope scope
@@ -42,6 +43,7 @@ angular.module("google-maps.directives.api.models.parent".ns())
             , true
 
         onWatch: (propNameToWatch, scope, newValue, oldValue) =>
+            throw new String("OnWatch Not Implemented!!")
 
         onDestroy: (scope) =>
             throw new String("OnDestroy Not Implemented!!")

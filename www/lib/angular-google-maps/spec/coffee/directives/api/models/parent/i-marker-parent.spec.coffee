@@ -1,19 +1,17 @@
-describe "IMarkerParentModel".ns(), ->
+describe "IMarkerParentModel", ->
   beforeEach ->
-    angular.mock.module("google-maps.directives.api.models.parent".ns())
+    angular.mock.module("google-maps.directives.api.models.parent")
 
     @clickCount = 0
-    inject ['$rootScope', '$timeout', '$compile', '$http', '$templateCache', '$interpolate', 'IMarkerParentModel'.ns(),
-      ($rootScope, $timeout, $compile, $http, $templateCache, $interpolate, IMarkerParentModel) =>
-        @rootScope = $rootScope
-        @scope = $rootScope.$new()
-        @ele = $compile('<ui-gmap-markers models="models"></ui-gmap-markers>')(@scope)
-        @attrs = {click: @click}
-        @IMarkerParentModel = IMarkerParentModel
-        @$timeout = $timeout
-        @scope.click = () =>
-          @clickCount++
-    ]
+    inject ($rootScope, $timeout, $compile, $http, $templateCache, $interpolate, IMarkerParentModel) =>
+      @rootScope = $rootScope
+      @scope = $rootScope.$new()
+      @ele = $compile('<markers models="models"></markers>')(@scope)
+      @attrs = {click: @click}
+      @IMarkerParentModel = IMarkerParentModel
+      @$timeout = $timeout
+      @scope.click = () =>
+        @clickCount++
 
   it "should instantiate", ->
     @scope.coords = {
@@ -60,7 +58,7 @@ describe "IMarkerParentModel".ns(), ->
       @subject = new @IMarkerParentModel(@scope, @ele, @attrs, null, @$timeout)
 
     it "should throw onWatch", ->
-      expect(@subject.onWatch).not.toThrow()
+      expect(@subject.onWatch).toThrow()
 
     it "should throw onDestroy", ->
       expect(@subject.onDestroy).toThrow()

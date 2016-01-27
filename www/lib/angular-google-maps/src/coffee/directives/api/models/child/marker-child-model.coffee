@@ -1,186 +1,142 @@
-angular.module("google-maps.directives.api.models.child".ns())
-.factory "MarkerChildModel".ns(), [ "ModelKey".ns(), "GmapUtil".ns(),
-  "Logger".ns(), "EventsHelper".ns(),"PropertyAction".ns(),
-  "MarkerOptions".ns(), "IMarker".ns(), "MarkerManager".ns(),
-  (ModelKey, GmapUtil, $log, EventsHelper, PropertyAction, MarkerOptions, IMarker, MarkerManager) ->
-    keys = ['coords', 'icon', 'options', 'fit']
-    class MarkerChildModel extends ModelKey
-      @include GmapUtil
-      @include EventsHelper
-      @include MarkerOptions
+angular.module("google-maps.directives.api.models.child")
+.factory "MarkerChildModel", [ "ModelKey", "GmapUtil", "Logger", "$injector", "EventsHelper",
+    (ModelKey, GmapUtil, Logger, $injector, EventsHelper) ->
+      class MarkerChildModel extends ModelKey
+        @include GmapUtil
+        @include EventsHelper
+        constructor: (@model, @parentScope, @gMap, @$timeout, @defaults, @doClick, @gMarkerManager, @idKey)->
+          self = @
+          @id = @model[@idKey] if @model[@idKey]
+          @iconKey = @parentScope.icon
+          @coordsKey = @parentScope.coords
+          @clickKey = @parentScope.click()
+          @labelContentKey = @parentScope.labelContent
+          @optionsKey = @parentScope.options
+          @labelOptionsKey = @parentScope.labelOptions
 
-      destroy = (child) ->
-        if child?.gMarker?
-          child.removeEvents child.externalListeners
-          child.removeEvents child.internalListeners
-          if child?.gMarker
-            child.gMarkerManager.remove child.gMarker if child.removeFromManager
-            child.gMarker.setMap null
-            child.gMarker = null
+          super(@parentScope.$new(false))
 
-      constructor: (scope, @model, @keys, @gMap, @defaults, @doClick, @gMarkerManager, @doDrawSelf = true,
-
-        @trackModel = true, @needRedraw = false) ->
-        @deferred = Promise.defer()
-        _.each @keys, (v, k) =>
-          @[k + 'Key'] = if _.isFunction @keys[k] then @keys[k]() else @keys[k]
-        @idKey = @idKeyKey or "id"
-        @id = @model[@idKey] if @model[@idKey]?
-
-        super(scope)
-
-        @setMyScope('all',@model, undefined, true)
-        @scope.getGMarker = =>
-          @gMarker
-        @createMarker(@model)
-        firstTime =  true
-        if @trackModel
           @scope.model = @model
+          @setMyScope(@model, undefined, true)
+          @createMarker(@model)
+
           @scope.$watch 'model', (newValue, oldValue) =>
             if (newValue != oldValue)
-              changes = @getChanges(newValue,oldValue, IMarker.keys)
-              _.each changes, (v, k) =>
-                @setMyScope k, newValue, oldValue
-                @needRedraw = true
+              @setMyScope(newValue, oldValue)
           , true
-        else
-          action = new PropertyAction  (calledKey, newVal) =>
-            @setMyScope(calledKey,scope) #being in a closure works , direct to setMyScope is not working (but should?)
-          , false
-          _.each @keys, (v, k) ->
-            scope.$watch(k, action.sic, true)
 
-        #hiding destroy functionality as it should only be called via scope.$destroy()
-        @scope.$on "$destroy", =>
-          destroy @
+          @$log = Logger
+          @$log.info(self)
+          @watchDestroy(@scope)
 
-        $log.info @
+        setMyScope: (model, oldModel = undefined, isInit = false) =>
+          @maybeSetScopeValue('icon', model, oldModel, @iconKey, @evalModelHandle, isInit, @setIcon)
+          @maybeSetScopeValue('coords', model, oldModel, @coordsKey, @evalModelHandle, isInit, @setCoords)
+          @maybeSetScopeValue('labelContent', model, oldModel, @labelContentKey, @evalModelHandle, isInit)
+          if _.isFunction(@clickKey) and $injector
+            @scope.click = () =>
+              $injector.invoke(@clickKey, undefined, {"$markerModel": model})
+          else
+            @maybeSetScopeValue('click', model, oldModel, @clickKey, @evalModelHandle, isInit)
+            @createMarker(model, oldModel, isInit)
 
-      destroy: (removeFromManager = true)=>
-        @removeFromManager = removeFromManager
-        @scope.$destroy()
+        createMarker: (model, oldModel = undefined, isInit = false)=>
+          @maybeSetScopeValue 'options', model, oldModel, @optionsKey, (lModel, lModelKey) =>
+            if lModel == undefined
+              return undefined
+            value = if lModelKey == 'self' then lModel else lModel[lModelKey]
+            if value == undefined # we still dont have a value see if this is something up the tree or default it
+              value = if lModelKey == undefined then @defaults else @scope.options
+            else
+              value
+          , isInit, @setOptions
 
-      setMyScope: (thingThatChanged, model, oldModel = undefined, isInit = false) =>
-        model = @model unless model?
-        if !@gMarker
-          @setOptions(@scope)
-          justCreated = true
-        switch thingThatChanged
-          when 'all'
-            _.each @keys, (v,k) =>
-              @setMyScope k, model, oldModel, isInit
-          when 'icon'
-            @maybeSetScopeValue('icon', model, oldModel, @iconKey, @evalModelHandle, isInit, @setIcon)
-          when 'coords'
-            @maybeSetScopeValue('coords', model, oldModel, @coordsKey, @evalModelHandle, isInit, @setCoords)
-          when 'options'
-            @createMarker(model, oldModel, isInit) if !justCreated
 
-      createMarker: (model, oldModel = undefined, isInit = false)=>
-        @maybeSetScopeValue 'options', model, oldModel, @optionsKey, @evalModelHandle, isInit, @setOptions
-
-      maybeSetScopeValue: (scopePropName, model, oldModel, modelKey, evaluate, isInit, gSetter = undefined) =>
-        if oldModel == undefined
-          @scope[scopePropName] = evaluate(model, modelKey)
-          gSetter(@scope) if gSetter?
-          return
-
-        oldVal = evaluate(oldModel, modelKey)
-        newValue = evaluate(model, modelKey)
-        if newValue != oldVal
-          @scope[scopePropName] = newValue
-          unless isInit
-            gSetter(@scope) if gSetter?
-            @gMarkerManager.draw() if @doDrawSelf
-
-      isNotValid:(scope, doCheckGmarker = true) =>
-        hasNoGmarker = unless doCheckGmarker then false else @gMarker == undefined
-        hasIdenticalScopes = unless @trackModel then scope.$id != @scope.$id else false
-        hasIdenticalScopes or hasNoGmarker
-
-      setCoords: (scope) =>
-        return if @isNotValid(scope) or  !@gMarker?
-        if @getProp(@coordsKey,@model)?
-          if !@validateCoords(@getProp(@coordsKey,@model))
-            $log.debug "MarkerChild does not have coords yet. They may be defined later."
+        maybeSetScopeValue: (scopePropName, model, oldModel, modelKey, evaluate, isInit, gSetter = undefined) =>
+          if oldModel == undefined
+            @scope[scopePropName] = evaluate(model, modelKey)
+            unless isInit
+              gSetter(@scope) if gSetter?
             return
-          @gMarker.setPosition @getCoords(@getProp(@coordsKey,@model))
-          @gMarker.setVisible @validateCoords(@getProp(@coordsKey,@model))
 
-          @gMarkerManager.add @gMarker
-        else
-          @gMarkerManager.remove @gMarker
+          oldVal = evaluate(oldModel, modelKey)
+          newValue = evaluate(model, modelKey)
+          if(newValue != oldVal and @scope[scopePropName] != newValue)
+            @scope[scopePropName] = newValue
+            unless isInit
+              gSetter(@scope) if gSetter?
+              @gMarkerManager.draw()
 
-      setIcon: (scope) =>
-        return if @isNotValid(scope) or  !@gMarker?
-        # @gMarkerManager.remove @gMarker
-        @gMarker.setIcon @getProp(@iconKey,@model)
-        @gMarkerManager.add @gMarker
-        @gMarker.setPosition @getCoords(@getProp(@coordsKey,@model))
-        @gMarker.setVisible @validateCoords(@getProp(@coordsKey,@model))
+        destroy: () =>
+          @scope.$destroy()
 
-      setOptions: (scope) =>
-        return if @isNotValid scope, false
+        setCoords: (scope) =>
+          if(scope.$id != @scope.$id or @gMarker == undefined)
+            return
+          if (scope.coords?)
+            if !@validateCoords(@scope.coords)
+              @$log.error "MarkerChildMarker cannot render marker as scope.coords as no position on marker: #{JSON.stringify @model}"
+              return
+            @gMarker.setPosition(@getCoords(scope.coords))
+            @gMarker.setVisible(@validateCoords(scope.coords))
+            @gMarkerManager.remove(@gMarker)
+            @gMarkerManager.add(@gMarker)
+          else
+            @gMarkerManager.remove(@gMarker)
 
-        unless scope.coords?
-          return
-        coords = @getProp(@coordsKey,@model)
-        icon = @getProp(@iconKey,@model)
-        _options = @getProp(@optionsKey,@model)
-        @opts = @createOptions(coords,icon,_options)
+        setIcon: (scope) =>
+          if(scope.$id != @scope.$id or @gMarker == undefined)
+            return
+          @gMarkerManager.remove(@gMarker)
+          @gMarker.setIcon(scope.icon)
+          @gMarkerManager.add(@gMarker)
+          @gMarker.setPosition(@getCoords(scope.coords))
+          @gMarker.setVisible(@validateCoords(scope.coords))
 
-        if @gMarker? and (@isLabel @gMarker == @isLabel @opts)
-          @gMarker.setOptions @opts
-        else
+        setOptions: (scope) =>
+          if(scope.$id != @scope.$id)
+            return
+
           if @gMarker?
-            @gMarkerManager.remove @gMarker
-            @gMarker = null
+            @gMarkerManager.remove(@gMarker)
+            delete @gMarker
+          unless scope.coords ? scope.icon? scope.options?
+            return
+          @opts = @createMarkerOptions(scope.coords, scope.icon, scope.options)
 
-        unless @gMarker
-          if @isLabel @opts
-            @gMarker = new MarkerWithLabel @setLabelOptions @opts
+          delete @gMarker
+          if @isLabelDefined(scope)
+            @gMarker = new MarkerWithLabel(@setLabelOptions(@opts, scope))
           else
             @gMarker = new google.maps.Marker(@opts)
 
-        #hook external event handlers for events
-        @removeEvents @externalListeners if @externalListeners
-        @removeEvents @internalListeners if @internalListeners
-        @externalListeners = @setEvents @gMarker, @scope, @model, ['dragend']
-        #must pass fake $apply see events-helper
-        @internalListeners = @setEvents @gMarker, {events: @internalEvents(), $apply: () ->}, @model
+          @setEvents @gMarker, @parentScope, @model
 
-        @gMarker.key = @id if @id?
-        @gMarkerManager.add @gMarker
+          @gMarker.key = @id if @id
 
-        if @gMarker and (@gMarker.getMap() or @gMarkerManager.type != MarkerManager.type)
-          @deferred.resolve @gMarker
-        else
-          @deferred.reject "gMarker is null" unless @gMarker
-          unless @gMarker.getMap() and @gMarkerManager.type == MarkerManager.type
-            $log.warn 'gMarker has no map yet'
-            @deferred.resolve @gMarker
+          @gMarkerManager.add(@gMarker)
+          google.maps.event.addListener @gMarker, 'click', =>
+            if @doClick and @scope.click?
+              @scope.click()
 
-        if @model[@fitKey]
-          @gMarkerManager.fit()
+        isLabelDefined: (scope) =>
+          scope.labelContent?
 
+        setLabelOptions: (opts, scope) =>
+          opts.labelAnchor = @getLabelPositionPoint(scope.labelAnchor)
+          opts.labelClass = scope.labelClass
+          opts.labelContent = scope.labelContent
+          opts
 
-      setLabelOptions: (opts) =>
-        opts.labelAnchor = @getLabelPositionPoint opts.labelAnchor
-        opts
-
-      internalEvents: =>
-        dragend: (marker, eventName, model, mousearg) =>
-          modelToSet = if @trackModel then @scope.model else @model
-          newCoords = @setCoordsFromEvent @modelOrKey(modelToSet, @coordsKey), @gMarker.getPosition()
-          modelToSet = @setVal(model, @coordsKey, newCoords)
-          #since we ignored dragend for scope above, if @scope.events has it then we should fire it
-          events = @scope.events
-          events.dragend(marker, eventName, modelToSet, mousearg) if events?.dragend?
-          @scope.$apply()
-        click: (marker, eventName, model, mousearg) =>
-          click = if _.isFunction(@clickKey) then @clickKey else @getProp @clickKey, @model
-          if @doClick and click?
-            @scope.$apply click(marker, eventName, @model, mousearg)
-
-    MarkerChildModel
-]
+        watchDestroy: (scope)=>
+          scope.$on "$destroy", =>
+            if @gMarker? #this is possible due to _async in that we created some Children but no gMarker yet
+              google.maps.event.clearListeners @gMarker, 'click'
+              if @parentScope?.events and _.isArray @parentScope.events
+                @parentScope.events.forEach (event, eventName) ->
+                  google.maps.event.clearListeners @gMarker, eventName
+              @gMarkerManager.remove @gMarker, true
+              delete @gMarker
+            self = undefined
+      MarkerChildModel
+  ]

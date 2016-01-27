@@ -1,60 +1,17 @@
 angular.module("google-maps.mocks", [])
-.factory("GoogleApiMock", ->
-
-  class MockInfoWindow
-    constructor: ->
-      @_isOpen = false
-
-    open: (map, anchor) =>
-      @_isOpen = true
-      return
-
-    close: =>
-      @_isOpen = false
-      return
-
-    isOpen: (val = undefined) ->
-      unless val?
-        return @_isOpen
-      else
-        @_isOpen = val
-
-  getMarker = ->
-    map = undefined
-    Marker = (opts) -> return
-    Marker.prototype.setMap = (_map) ->
-      map = _map
-    Marker.prototype.getMap =  ->
-      map
-    Marker.prototype.setPosition = (position) ->
-    Marker.prototype.setIcon = (icon) ->
-    Marker.prototype.setVisible = (isVisible) ->
-    Marker.prototype.setOptions = (options) ->
-    return Marker
-
+.factory "GoogleApiMock", ->
+  class _Map
+    constructor:()->
+      @lat = 47
+      @lon = -27
+      @zoom = 0
+      @getCoords = -> return {latitude: @lat, longitude: @lon}
+      @center = new window.google.maps.LatLng @lat,@lon
+      @setCenter = (coords) =>
+        @center = coords
+      @setZoom = (@zoom) ->
   class GoogleApiMock
     constructor: ->
-      @mocks = [
-        @mockAPI
-        @mockLatLng
-        @mockLatLngBounds
-        @mockControlPosition
-        @mockAnimation
-        @mockMapTypeId
-        @mockOverlayView
-        @mockOverlayView
-        @mockEvent
-        @mockInfoWindow
-        @mockMarker
-        @mockMVCArray
-        @mockPoint
-        @mockPolygon
-        @mockMap
-        @mockPlaces
-        @mockSearchBox
-      ]
-      @initAll = -> @mocks.forEach (fn) -> fn?()
-
     mockAPI: ->
       window.google = {}
       window.google.maps = {}
@@ -65,7 +22,6 @@ angular.module("google-maps.mocks", [])
       window.google.maps.event =
         clearListeners: unmocked("event.clearListeners")
         addListener: unmocked("event.addListener")
-        removeListener: unmocked("event.removeListener")
       window.google.maps.OverlayView = unmocked("OverlayView")
       window.google.maps.InfoWindow = unmocked("InfoWindow")
       window.google.maps.LatLng = unmocked("LatLng")
@@ -73,18 +29,13 @@ angular.module("google-maps.mocks", [])
       window.google.maps.Point = unmocked("Point")
       window.google.maps.LatLngBounds = unmocked("LatLngBounds")
 
-    mockPlaces: ->
-      window.google.maps.places = {}
-
-    mockSearchBox: (SearchBox = () -> return) ->
-      window.google.maps.places.SearchBox = SearchBox
-
     #http://gis.stackexchange.com/questions/11626/does-y-mean-latitude-and-x-mean-longitude-in-every-gis-software
     mockLatLng: (LatLng = (y, x) ->
       lat: () ->
         y
       lng: () ->
-        x) ->
+        x
+    ) ->
       window.google.maps.LatLng = LatLng
 
     mockLatLngBounds: (LatLngBounds = () -> return) ->
@@ -93,60 +44,13 @@ angular.module("google-maps.mocks", [])
 
       window.google.maps.LatLngBounds = LatLngBounds
 
-    # mockMap:(Map = () -> return) ->
-    #   @mockMapTypeId()
-    #   @mockLatLng()
-    #   @mockOverlayView()
-    #   @mockEvent()
-    #   Map.getCoords = -> return {latitude: 47, longitude: -27} unless Map.getCoords?
-    #   window.google.maps.Map = Map
-    mockMap: =>
-      Map = () ->
-        @center =
-          lat: -> 0
-          lng: -> 0
-        @controls = {
-          TOP_CENTER: [],
-          TOP_LEFT: [],
-          TOP_RIGHT: [],
-          LEFT_TOP: [],
-          RIGHT_TOP: [],
-          LEFT_CENTER: [],
-          RIGHT_CENTER: [],
-          LEFT_BOTTOM: [],
-          RIGHT_BOTTOM: [],
-          BOTTOM_CENTER: [],
-          BOTTOM_LEFT: [],
-          BOTTOM_RIGHT: []
-        }
-        @overlayMapTypes = new window.google.maps.MVCArray()
-        @getControls = -> return @controls
-        @setZoom = -> return
-        @setCenter = -> return
-        @getCoords = -> return {latitude: 47, longitude: -27} unless Map.getCoords?
-        return @
+    mockMap:(map) ->
       @mockMapTypeId()
       @mockLatLng()
       @mockOverlayView()
       @mockEvent()
-      @mockMVCArray()
-      window.google.maps.Map = Map
-
-    mockControlPosition: ->
-      ControlPosition =
-        TOP_CENTER: 'TOP_CENTER',
-        TOP_LEFT: 'TOP_LEFT',
-        TOP_RIGHT: 'TOP_RIGHT',
-        LEFT_TOP: 'LEFT_TOP',
-        RIGHT_TOP: 'RIGHT_TOP',
-        LEFT_CENTER: 'LEFT_CENTER',
-        RIGHT_CENTER: 'RIGHT_CENTER',
-        LEFT_BOTTOM: 'LEFT_BOTTOM',
-        RIGHT_BOTTOM: 'RIGHT_BOTTOM',
-        BOTTOM_CENTER: 'BOTTOM_CENTER',
-        BOTTOM_LEFT: 'BOTTOM_LEFT',
-        BOTTOM_RIGHT: 'BOTTOM_RIGHT'
-      window.google.maps.ControlPosition = ControlPosition
+      map = _Map unless map
+      window.google.maps.Map = map
 
     mockAnimation: (Animation = {BOUNCE: "bounce"}) ->
       window.google.maps.Animation = Animation
@@ -154,8 +58,10 @@ angular.module("google-maps.mocks", [])
     mockMapTypeId: (MapTypeId = {ROADMAP: "roadmap"}) ->
       window.google.maps.MapTypeId = MapTypeId
 
-    mockOverlayView: (OverlayView = class OverlayView
-      setMap: () ->) ->
+    mockOverlayView: (
+      OverlayView = class OverlayView
+        setMap:() ->
+    ) ->
       window.google.maps.OverlayView = OverlayView
 
     mockEvent: (event = {}) ->
@@ -165,28 +71,18 @@ angular.module("google-maps.mocks", [])
         event.addListener = (thing, eventName, callBack) ->
           found = _.find listeners, (obj)->
             obj.obj == thing
-          unless found?
-            toPush = {}
-            toPush.obj = thing
-            toPush.events = {}
-            toPush.events[eventName] = callBack
-            listeners.push toPush
-          else
-            found.events[eventName] = callBack
-
-        event.addListenerOnce = (thing, eventName, callBack) ->
-          callBack() #forcing immediate return for idle so async api kicks off
-          event.addListener(thing, eventName, callBack)
+            unless found?
+              toPush = {}
+              toPush.obj = thing
+              toPush.events = {}
+              toPush.events[eventName] = callBack
+              listeners.push toPush
+            else
+              found.events[eventName] = callBack
 
       if not event.clearListeners
         event.clearListeners = () ->
           listeners.length = 0
-
-      if not event.removeListener
-        event.removeListener = (item) ->
-          index = listeners.indexOf(item)
-          if index != -1
-            listeners.splice(index)
 
       unless event.fireListener
         event.fireListener = (thing, eventName) =>
@@ -196,12 +92,11 @@ angular.module("google-maps.mocks", [])
 
 
       window.google.maps.event = event
-      return listeners
 
-    mockInfoWindow: (InfoWindow = MockInfoWindow) ->
+    mockInfoWindow: (InfoWindow = () -> return) ->
       window.google.maps.InfoWindow = InfoWindow
 
-    mockMarker: (Marker = getMarker()) ->
+    mockMarker: (Marker = @getMarker()) ->
       window.google.maps.Marker = Marker
 
     mockMVCArray: () ->
@@ -219,53 +114,15 @@ angular.module("google-maps.mocks", [])
 
       window.google.maps.MVCArray = MVCArray
 
-    mockPoint: (Point = (x, y) -> return {x: x, y: y}) ->
+    mockPoint: (Point = (x,y) -> return {x: x, y:y}) ->
       window.google.maps.Point = Point
 
-    mockPolygon: (polygon) ->
-      return window.google.maps.Polygon = polygon if polygon?
+    getMarker: ->
+      Marker = (opts) -> return
+      Marker.prototype.setMap = (map) ->
+        return
 
-      #https://developers.google.com/maps/documentation/javascript/reference#Polygon
-      #https://developers.google.com/maps/documentation/javascript/reference#PolygonOptions
-      window.google.maps.Polygon = (options) ->
-        @getDraggable = ->
-          options.draggable
-        @getEditable = ->
-          options.editable
-        @getMap = ->
-          options.map
-        @getPath = ->
-          _.first(options.paths)
-        @getPaths = ->
-          options.paths
-        @getVisible = ->
-          options.visible
-        @setOptions = (opts) ->
-          options = opts
-
-        @setDraggable = (boolean) ->
-          options.draggable = boolean
-        @setEditable = (boolean) ->
-          options.editable = boolean
-        @setMap = (map) ->
-          options.map = map
-        @setPath = (path) ->
-          if options.paths? and options.paths.length > 0
-            options.paths[0] = path
-          else
-            options.paths = []
-            options.paths.push path
-
-        @setPaths = (paths) ->
-          options.paths = paths
-
-        @setVisible = (boolean) ->
-          options.visible = boolean
-        @
-
-    getMarker: getMarker
+      return Marker
 
   GoogleApiMock
-)
 
-angular.module("google-maps.mocks".ns(),["google-maps".ns(),"google-maps.mocks"])
