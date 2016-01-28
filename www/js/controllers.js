@@ -4,11 +4,11 @@ angular.module('starter.controllers',[])
         return data.connstate.state=='signin';
     }
 })
-.controller('AccountCtrl',function($scope,$rootScope,$state,data,$cordovaDevice,localstorage){
+.controller('AccountCtrl',function($scope,$rootScope,$state,data,$cordovaDevice,localstorage, $cordovaOauth, LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, $http, LINKEDIN_OAUTH_URL){
     localstorage.set('state','tab.account');
     $scope.device = data.device;
-
     $scope.user = {};
+
     if (data.user.name) {
         $scope.user.name = data.user.name;
     }
@@ -20,10 +20,42 @@ angular.module('starter.controllers',[])
         data.uuid = getUUID();
     }
     $scope.uuid = data.uuid;
+
     $scope.signin=function(){
-        if (!$scope.user.name||!$scope.user.phone) {
+        console.log("signing in ...");
+        console.log("LINKEDIN_CLIENT_ID = "+LINKEDIN_CLIENT_ID);
+        console.log("LINKEDIN_CLIENT_SECRET = "+LINKEDIN_CLIENT_SECRET);
+        if (!$scope.user.phone) {
             return;
         }
+        $cordovaOauth.linkedin(LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, ["r_basicprofile"], "0x12345").then(
+        function(result) {
+            console.log("LinkedIn Login Successful");
+            var access_token = result.access_token;
+            var expire_date = result.expires_in;
+
+            $http.get(LINKEDIN_OAUTH_URL,
+                {headers: {"Authorization": "Bearer "+result.access_token}
+            }).then(
+            function(retdata) {
+                data.user.name = retdata.data.firstName + ' ' + retdata.data.lastName;
+                data.user.phone = $scope.user.phone;
+                $scope.user.name = data.user.name;
+                data.connstate.state='signin';
+                localstorage.set('name', data.user.name);
+                localstorage.set('phone', data.user.phone);
+                localstorage.set('connstate',data.connstate.state);
+                data.socket.emit('rider:signin', {user:$scope.user, device:data.device});
+                $state.go('tab.dash');
+            },
+            function(retdata) {
+            });
+        },
+        function(data, status) {
+            console.log("LinkedIn Login Failed");
+        });
+
+        /*
         data.user.name=$scope.user.name;
         data.user.phone=$scope.user.phone;
         data.connstate.state = 'signin';
@@ -32,6 +64,7 @@ angular.module('starter.controllers',[])
         localstorage.set('connstate',data.connstate.state);
         data.socket.emit('driver:signin', {user:$scope.user, device:data.device});
         $state.go('tab.dash');
+        */
     }
     $scope.signout=function(){
         $rootScope.messages = [];
