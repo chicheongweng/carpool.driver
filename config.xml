@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="hk.freeride.driver" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>hk.freeride.driver</name>
+  <name>Driver App (Carpool)</name>
   <description>
-        HK FREERIDE DRIVER
+        Driver App (Carpool)
   </description>
   <author email="chicheongweng@gmail.com" href="http://facebook.com/">
     Chi-Cheong Weng
