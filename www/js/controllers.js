@@ -101,4 +101,51 @@ angular.module('starter.controllers',[])
         });     
         data.requestlistenerAdded = true;
     }
+})
+
+.controller('MapCtrl', function($scope, $http, localstorage, data, geo) {
+    localstorage.set('state','tab.map');
+    $scope.msg = "";
+    $scope.coords = [0,0];
+    $scope.mapVisible = true;
+
+    var updateCenter = function(lat, lng) {
+        /*var mapOptions = {
+            center: new google.maps.LatLng(0,0),
+            zoom: 16,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };*/
+        $scope.map.setCenter(new google.maps.LatLng(lat, lng));
+        $scope.map.setZoom(16);
+        $scope.centerLat = lat;
+        $scope.centerLng = lng;
+        $scope.mapVisible =true;
+    };
+
+    var updateMarker = function(lat, lng, map) {
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat,lng),
+            map: map,
+            title: 'Current Location'
+        });
+    };
+
+    var init = function () {
+        var mapOptions = {};
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+        $scope.map = map;
+        geo.getGeoLocation(function(lat, lng){
+            $scope.msg = lat + ":" + lng;
+            updateCenter(lat, lng);
+            updateMarker(lat, lng, map);
+            geo.getAddressFromGeoLocation(lat, lng, function(address) {
+                $scope.address = address;
+            });
+        }, function(err) {
+            $scope.msg = err;
+            $scope.address = "unknown";
+        });
+    };
+
+    init();
 });

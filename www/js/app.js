@@ -8,7 +8,7 @@ function getUUID() {
     return u;
 };
 
-angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'starter.services', 'ngCordova'])
+angular.module('starter', ['ionic', 'ngCordova', 'ngCordovaOauth', 'google-maps', 'starter.config', 'starter.controllers', 'starter.services'])
 
 .run(function($ionicPlatform,$state,$rootScope,$window,$cordovaNativeAudio,$cordovaDevice,MEDIA_FILE,$cordovaNativeAudio) {
   $ionicPlatform.ready(function() {
@@ -102,6 +102,16 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
           controller: 'AccountCtrl'
         }
       }
+    })
+
+    .state('tab.map', {
+        url: '/map',
+        views: {
+            'tab-map': {
+            templateUrl: 'templates/tab-map.html',
+            controller: 'MapCtrl'
+            }
+        }
     });
 
   // if none of the above states are matched, use this as the fallback
@@ -134,17 +144,18 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
         getAddressFromGeoLocation: function(lat, lng, callback) {
             apiKey = GOOGLEMAP_API_KEY;
             url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&location_type=ROOFTOP&result_type=street_address&key='+apiKey;
+            console.log("url = "+url);
             $http.get(url).
                 success(function(data, status, headers, config) {
-                if (data.status=='OK') {
-                    address = data.results[0].formatted_address;
-                }   
-                else {
-                    address = "unknown";
-                };  
-                callback && callback(address);
-            }); 
-        },  
+                    if (data.status=='OK') {
+                        address = data.results[0].formatted_address;
+                    }
+                    else {
+                        address = "unknown";
+                    };
+                    callback && callback(address);
+            });
+        },
 
         getGeoLocation: function(callback, callbackerr) {
             $cordovaGeolocation.getCurrentPosition().then(function(position) {
@@ -153,12 +164,12 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
                 callback && callback(lat, lng);
             }, function(err) {
                 callbackerr && callbackerr("unable to determine location");
-            }); 
-        },  
-    }   
+            });
+        },
+    }
 })
 
-.factory('data', function ($cordovaDevice, $window, geo, $cordovaKeychain, $rootScope) {
+.factory('data', function ($cordovaDevice, $window, geo, $cordovaKeychain, $rootScope, GOOGLEMAP_API_KEY) {
     $rootScope.disconnect = 0;
     $rootScope.connect_failed = 0;
     $rootScope.update_geopos = 0;
@@ -277,6 +288,7 @@ angular.module('starter', ['ionic', 'starter.config', 'starter.controllers', 'st
     $rootScope.waitforaccept = false;
     
     return {
+        apiKey: GOOGLEMAP_API_KEY,
         device: device,
         user: user,
         URL: URL,
