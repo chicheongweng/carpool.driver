@@ -169,12 +169,12 @@ angular.module('starter', ['ionic', 'ngCordova', 'ngCordovaOauth', 'google-maps'
     }
 })
 
-.factory('data', function ($cordovaDevice, $window, geo, $cordovaKeychain, $rootScope, GOOGLEMAP_API_KEY) {
+.factory('data', function ($cordovaDevice, $window, geo, $cordovaKeychain, $rootScope, GOOGLEMAP_API_KEY, DRIVER_SOCKET_URL) {
     $rootScope.disconnect = 0;
     $rootScope.connect_failed = 0;
     $rootScope.update_geopos = 0;
     $rootScope.address = undefined;
-    var URL = 'uber.ratecoworkers.com:8000';
+    var URL = DRIVER_SOCKET_URL;
     var device;
     var socket;
     var user = {

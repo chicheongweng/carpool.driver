@@ -83,7 +83,7 @@ angular.module('starter.controllers',[])
     $scope.device = data.device;
     $scope.name = data.user.name;
     $scope.phone = data.user.phone;
-    /*
+
     geo.getGeoLocation(function(lat, lng){
         geo.getAddressFromGeoLocation(lat, lng, function(address) {
             $scope.lat = lat;
@@ -93,7 +93,7 @@ angular.module('starter.controllers',[])
     }, function(err) {
         $scope.address = "unknown";
     });
-    */
+
     if (data.socket && !data.requestlistenerAdded) {
         data.socket.on('request',function(data, callback){
             $rootScope.secondsremaining = 30;
